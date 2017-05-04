@@ -1,25 +1,22 @@
+dist: trusty
 sudo: required
 
 language: c
 
-os:
- - linux
+services:
+ - docker
 
 compiler:
  - gcc
 
-before_script:
+before_install:
  - git clone https://github.com/jedisct1/libsodium.git --branch=stable
- - cd libsodium
- - ./configure --disable-dependency-tracking
- - sudo make install
- - sudo ldconfig
- - cd ..
  - ./autogen.sh
- - ./configure --disable-dependency-tracking --enable-plugins
+ - docker run --rm --privileged multiarch/qemu-user-static:register --reset
 
 script:
- - make -j$(nproc)
+ - docker run --rm -v $(pwd):/workdir multiarch/alpine:armhf-edge  /workdir/.travis.sh
+ - docker run --rm -v $(pwd):/workdir pritunl/archlinux:latest     /workdir/dist-build/win32-win64-xcompile.sh
 
 matrix:
  - fast_finish: true
